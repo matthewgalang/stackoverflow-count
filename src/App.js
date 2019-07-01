@@ -1,26 +1,61 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import api from './utils/api';
+import isLocalHost from './utils/isLocalHost';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default class App extends Component {
+  state = {
+    counts: []
+  }
+  componentDidMount() {
+    // Fetch all todos
+    api.readAll().then((counts) => {
+      if (counts.message === 'unauthorized') {
+        if (isLocalHost()) {
+          alert('FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info')
+        } else {
+          alert('FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct')
+        }
+        return false
+      }
+
+      console.log('all counts', counts)
+      this.setState({
+        counts: counts
+      })
+    })
+  }
+  renderCounts() {
+    const { counts } = this.state
+    
+    if (!counts || !counts.length) {
+      return null
+    }
+
+    return counts.map((count, i) => {
+      const { data, ref } = count
+      const id = getCountId(count)
+      return (
+        <div key={i}>
+          count.data = {data}
+          count.ref = {ref}
+          count.id = {id}
+        </div>
+      )
+    })
+  }
+  render() {
+    return (
+      <div>
+        {this.renderCounts()}
+      </div>
+    );
+  }
 }
 
-export default App;
+function getCountId(count) {
+  if (!count.ref) {
+    return null
+  }
+  return count.ref['@ref'].id
+}
