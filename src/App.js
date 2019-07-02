@@ -35,11 +35,17 @@ export default class App extends Component {
     return counts.map((count, i) => {
       const { data, ref } = count
       const id = getCountId(count)
+      let countTs
+      if (ref) {
+        countTs = (
+          <span>{count.ts}</span>
+        )
+      }
       return (
         <div key={i}>
-          count.data = {data}
-          count.ref = {ref}
-          count.id = {id}
+          <span>count.data["stackoverflow.com"] = {data["stackoverflow.com"]}</span><br></br>
+          <span>count.ts = {countTs}</span><br></br>
+          <span>count.id = {id}</span>
         </div>
       )
     })
